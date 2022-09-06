@@ -1,7 +1,9 @@
-import { logger } from "./libs/logger";
-import Hapi, { Request, ResponseToolkit } from "@hapi/hapi";
 import { Server } from "@hapi/hapi";
+import Hapi, { Request, ResponseToolkit } from "@hapi/hapi";
+import axios from "axios";
+import Handlebars from "handlebars";
 import ETL from "./libs/etl";
+import { logger } from "./libs/logger";
 
 export let server: Server;
 
@@ -14,13 +16,23 @@ export const init = async function (): Promise<Server> {
     server.route({
         method: "POST",
         path: "/{transformerId}",
-        handler: (req: Request, h: ResponseToolkit) => {
+        handler: async (req: Request, h: ResponseToolkit) => {
             const { transformerId } = req.params;
 
             logger.info({ transformerId }, "received webhook request");
 
             try {
-                return h.response(new ETL(transformerId).process(req.payload));
+                const transformer = new ETL(transformerId);
+                const payload = transformer.process(req.payload);
+                const context = transformer.getContext();
+
+                for (const target of transformer.getTargets()) {
+                    const template = Handlebars.compile(target);
+                    const url = template(context);
+                    await axios.post(url, payload);
+                }
+
+                return h.response({ payload, targets: transformer.getTargets() });
             } catch (error) {
                 return h.response({ error: error.message, payload: req.payload }).code(400);
             }

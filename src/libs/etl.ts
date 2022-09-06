@@ -24,6 +24,11 @@ interface Transformer {
     id: string;
     extractors: Extractor[];
     output: string;
+    targets: string[];
+}
+
+interface Context {
+    [key: string]: string;
 }
 
 const resolvePath = (object: Object, path: string, defaultValue: any = null): string =>
@@ -31,6 +36,7 @@ const resolvePath = (object: Object, path: string, defaultValue: any = null): st
 
 export default class ETL {
     transformer: Transformer;
+    context: Context;
 
     constructor(jsonfile: string) {
         const relativePath = path.relative(process.cwd(), `src/transformers/${jsonfile}.json`);
@@ -43,13 +49,22 @@ export default class ETL {
         }
 
         this.transformer = JSON.parse(fs.readFileSync(relativePath).toString());
+        this.context = {};
     }
+
+    getTargets = (): string[] => {
+        if (!this.transformer.targets || this.transformer.targets.length === 0) return [];
+        return this.transformer.targets;
+    };
+
+    getContext = (): Context => {
+        return this.context;
+    };
 
     process = (payload: Object) => {
         logger.debug({ transformer: this.transformer }, "using transformer");
         logger.debug({ payload }, "extracting data from payload");
 
-        const context = {};
         for (const extractor of this.transformer.extractors) {
             logger.debug({ extractor }, "processing extractor");
 
@@ -64,7 +79,7 @@ export default class ETL {
             switch (extractor.type) {
                 case "path": {
                     logger.debug("extracting using path");
-                    context[extractor.output] = input;
+                    this.context[extractor.output] = input;
                     logger.debug({ context: extractor.output, value: input }, "extraction result");
                     break;
                 }
@@ -74,7 +89,7 @@ export default class ETL {
                     const regex = new RegExp(decodeURI(extractor.regex), "g");
                     const match = Array.from(input.matchAll(regex), (m) => m[1]);
                     logger.debug({ context: extractor.output, value: match[0] }, "extraction result");
-                    context[extractor.output] = match[0] || null;
+                    this.context[extractor.output] = match[0] || null;
                     break;
                 }
 
@@ -85,7 +100,7 @@ export default class ETL {
             }
         }
 
-        logger.debug({ context }, "context from extraction");
+        logger.debug({ context: this.context }, "context from extraction");
 
         const outputString = JSON.stringify(this.transformer.output);
         const regex = /(?<expression>"{{(?<variable>\w+):(?<type>\w+)}}")/g;
@@ -96,10 +111,10 @@ export default class ETL {
             const exp: ExpressionGroup = replaceTarget.groups as unknown as ExpressionGroup;
 
             let value = "";
-            if (exp.type === "string") value = `"${context[exp.variable]}"`;
-            if (exp.type === "number") value = `${context[exp.variable]}`;
+            if (exp.type === "string") value = `"${this.context[exp.variable]}"`;
+            if (exp.type === "number") value = `${this.context[exp.variable]}`;
 
-            if (!context[exp.variable]) value = "null";
+            if (!this.context[exp.variable]) value = "null";
 
             replacements.push({
                 expression: exp.expression,

@@ -28,6 +28,14 @@ describe("sample transformer", () => {
                 regex: "valuable data",
             },
         });
+
+        expect(etl.getContext()).toStrictEqual({
+            pathString: "sample data 1",
+            pathNumber: "1",
+            regex: "valuable data",
+        });
+
+        expect(etl.getTargets()).toContain("https://other-webhook.site/");
     });
 
     it("should return null in output when regex does not match with data", () => {

@@ -24,5 +24,6 @@
             "number": "{{pathNumber:number}}",
             "regex": "{{regex:string}}"
         }
-    }
+    },
+    "targets": ["https://other-webhook.site/"]
 }

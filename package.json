@@ -6,7 +6,7 @@
     "scripts": {
         "build": "tsc --build",
         "postbuild": "shx cp ./src/transformers/*.json ./dist/transformers/",
-        "dev": "nodemon ./src/main.ts",
+        "dev": "nodemon ./src/main.ts | pino-pretty",
         "start": "npm run build && node dist/main.js",
         "test": "jest --verbose"
     },
@@ -22,8 +22,11 @@
     "jest": {
         "preset": "ts-jest",
         "testEnvironment": "node",
-        "testPathIgnorePatterns": [
-            "<rootDir>/dist"
+        "collectCoverageFrom": [
+            "**/*.ts"
+        ],
+        "roots": [
+            "<rootDir>/src"
         ]
     },
     "devDependencies": {
@@ -40,6 +43,8 @@
     },
     "dependencies": {
         "@hapi/hapi": "^20.2.2",
+        "axios": "^0.27.2",
+        "handlebars": "^4.7.7",
         "pino": "^8.5.0"
     }
 }
