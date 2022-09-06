@@ -1,0 +1,28 @@
+{
+    "id": "sample",
+    "extractors": [
+        {
+            "type": "path",
+            "path": "level1.level2.string",
+            "output": "pathString"
+        },
+        {
+            "type": "path",
+            "path": "level1.level2.number",
+            "output": "pathNumber"
+        },
+        {
+            "type": "regex",
+            "regex": "{(.+)}",
+            "path": "level1.level2.regex",
+            "output": "regex"
+        }
+    ],
+    "output": {
+        "data": {
+            "string": "{{pathString:string}}",
+            "number": "{{pathNumber:number}}",
+            "regex": "{{regex:string}}"
+        }
+    }
+}

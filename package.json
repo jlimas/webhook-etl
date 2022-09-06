@@ -1,0 +1,45 @@
+{
+    "name": "webhook-etl",
+    "version": "1.0.0",
+    "description": "Transform incoming webhook payloads and send the result to other services",
+    "main": "main.js",
+    "scripts": {
+        "build": "tsc --build",
+        "postbuild": "shx cp ./src/transformers/*.json ./dist/transformers/",
+        "dev": "nodemon ./src/main.ts",
+        "start": "npm run build && node dist/main.js",
+        "test": "jest --verbose"
+    },
+    "author": "Jorge Limas <jorge.limas@yalo.com>",
+    "license": "ISC",
+    "prettier": {
+        "semi": true,
+        "trailingComma": "es5",
+        "singleQuote": false,
+        "printWidth": 120,
+        "tabWidth": 4
+    },
+    "jest": {
+        "preset": "ts-jest",
+        "testEnvironment": "node",
+        "testPathIgnorePatterns": [
+            "<rootDir>/dist"
+        ]
+    },
+    "devDependencies": {
+        "@types/hapi__hapi": "^20.0.12",
+        "@types/jest": "^28",
+        "@types/node": "^16",
+        "jest": "^28",
+        "nodemon": "^2.0.19",
+        "pino-pretty": "^9.1.0",
+        "shx": "^0.3.4",
+        "ts-jest": "^28",
+        "ts-node": "^10.9.1",
+        "typescript": "^4.8.2"
+    },
+    "dependencies": {
+        "@hapi/hapi": "^20.2.2",
+        "pino": "^8.5.0"
+    }
+}

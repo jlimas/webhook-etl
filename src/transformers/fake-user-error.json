@@ -1,0 +1,20 @@
+{
+    "id": "sample",
+    "extractors": [
+        {
+            "type": "path",
+            "path": "user.name",
+            "output": "user"
+        },
+        {
+            "type": "regex",
+            "regex": "Error: (.+)",
+            "path": "error.message",
+            "output": "error"
+        }
+    ],
+    "output": {
+        "user": "{{user:string}}",
+        "error": "{{error:string}}"
+    }
+}
