@@ -43,12 +43,11 @@ export const init = async function (): Promise<Server> {
 };
 
 export const start = async function (): Promise<void> {
-    console.log(`Listening on ${server.settings.host}:${server.settings.port}`);
+    logger.info({ host: server.settings.host, port: server.settings.port }, "server listening");
     return server.start();
 };
 
 process.on("unhandledRejection", (err) => {
-    console.error("unhandledRejection");
-    console.error(err);
+    logger.error(err, "unhandledRejection");
     process.exit(1);
 });
